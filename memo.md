@@ -73,28 +73,64 @@ Serial_Motorのリメイク版を作成。クロスプラットフォーム対�
 ```
 Re-SerialMotor/
 ├── gui/                    # GUIアプリケーション
-│   ├── src/               # Rustソースコード
-│   ├── src-tauri/         # Tauriバックエンド
-│   ├── public/            # フロントエンド(HTML/CSS/JS)
-│   └── Cargo.toml
+│   ├── src-tauri/         # Tauriバックエンド(Rust)
+│   │   ├── src/
+│   │   │   ├── main.rs
+│   │   │   ├── serial.rs       # シリアル通信
+│   │   │   ├── config.rs       # 設定保存/読込
+│   │   │   └── protocol.rs     # コマンド生成
+│   │   └── Cargo.toml
+│   ├── src/               # フロントエンド(HTML/CSS/JS)
+│   │   ├── index.html
+│   │   ├── styles.css
+│   │   └── main.js
+│   └── package.json
 ├── firmware/              # F446REファームウェア
-│   ├── platformio.ini
-│   ├── src/
-│   └── lib/
+│   ├── f446re/           # 既存F446RE用
+│   │   ├── platformio.ini
+│   │   └── src/
+│   └── firstpenguin/     # FirstPenguin用(後日追加)
+│       ├── platformio.ini
+│       └── src/
 ├── docs/                  # ドキュメント
+│   ├── protocol.md       # 通信プロトコル仕様
+│   └── build.md          # ビルド手順
 └── .github/workflows/     # CI/CD設定
+    └── release.yml
 ```
 
 ### 通信プロトコル
 - ボーレート: 115200 bps
-- コマンド形式: (要確認・既存プロトコルを調査)
 - タイムアウト: 1秒
+- データ形式: ASCII文字列 (改行/CR終端)
+
+#### コマンド仕様(既存F446RE)
+
+**基本制御:**
+- `i` - 動作開始(running = true)
+- `o` - 動作停止(running = false)
+
+**PWMモード:**
+- `md` - PWMモードに切り替え
+- `[数値]` - 全PWM一括設定 (-32000 ~ 32000)
+- `p0:[数値],p1:[数値],...` - 個別PWM設定 (例: `p0:1000,p1:-500`)
+- `c[数値]` - CAN ID設定 (1~4)
+
+**RoboMasモード(Phase 2実装):**
+- `mr` - RoboMasモードに切り替え
+- `n[数値]` - 使用するモーター数設定 (1~8)
+- `[数値]` - 全モーター一括RPM設定 (-10000 ~ 10000)
+- `r0:[数値],r1:[数値],...` - 個別モーターRPM設定
+
+#### FirstPenguin基板プロトコル
+**TODO: 仕様確認後に追記**
 
 ## 実装ステップ
 
 ### Phase 1: 基本設計
-- [ ] 既存コードの詳細分析
-- [ ] 通信プロトコル仕様の文書化
+- [x] 既存コードの詳細分析
+- [x] 通信プロトコル仕様の文書化(F446RE分)
+- [ ] FirstPenguin仕様確認
 - [ ] UIモックアップ作成
 
 ### Phase 2: GUI実装(コア機能)
@@ -144,7 +180,10 @@ Re-SerialMotor/
   - 通信プロトコル
   - 制御パラメータ
   - 機能要件
-- [ ] 既存F446REの通信プロトコル詳細分析
+- [x] 既存F446REの通信プロトコル詳細分析
+  - PWMモード: 4ch制御、CAN経由
+  - コマンド: i/o(開始/停止), p0~p3(個別), c(CAN ID)
+  - 値範囲: -32000 ~ 32000
 
 ### 優先度B: 開発環境構築
 - [ ] Rust開発環境セットアップ
