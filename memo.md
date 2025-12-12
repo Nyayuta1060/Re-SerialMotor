@@ -7,12 +7,36 @@ Serial_Motorのリメイク版を作成。クロスプラットフォーム対�
 - 既存のPython/Tkinter実装をより保守性・配布性の高い形に刷新
 - クロスプラットフォーム対応(Windows/Linux)
 - GitHub Releasesによる簡単な配布
-- F446REファームウェアとのシリアル通信によるモーター制御
+- F446REマイコン経由で複数のモータードライバーを制御
+  - 丼モタ(現行実装)
+  - FirstPenguin(自作基板)
+  - RoboMaster C620(将来実装)
 
 ## 配布形態
 - **GUIアプリケーション**: 実行可能ファイル(exe/バイナリ)
-- **F446REファームウェア**: platformio.iniとソースコードのzipファイル
+- **F446REファームウェア**: 
+  - プリビルド済みバイナリ(.bin)を**3種類**アプリに同梱
+    - 丼モタ用 (f446re-donmotor.bin)
+    - FirstPenguin用 (f446re-firstpenguin.bin)
+    - RoboMaster用 (f446re-robomaster.bin)
+  - ソースコード(platformio.ini + src/)も提供(カスタマイズ用)
 - **配布方法**: GitHub Releases
+
+### ファームウェア書き込み方法
+**採用方式: ST-Link経由**
+- メリット: 最も一般的、デバッグ用に既に接続されている
+- 必要ツール: `st-flash` (stlink-toolsパッケージ)
+- コマンド: `st-flash write firmware.bin 0x8000000`
+
+**代替案:**
+1. DFUモード(USB経由)
+   - ツール: `dfu-util`
+   - 利点: ST-Link不要
+   - 欠点: BOOTピン操作が必要
+2. シリアルブートローダー
+   - ツール: `stm32flash`
+   - 利点: UART経由で書き込み可能
+   - 欠点: BOOTピン操作が必要、速度が遅い
 
 ## 現在の機能(移行対象)
 - シリアルポート選択・接続
@@ -57,12 +81,19 @@ Serial_Motorのリメイク版を作成。クロスプラットフォーム対�
 ### 必須機能(Phase 1)
 - [ ] シリアルポート自動検出・選択
 - [ ] 接続/切断機能
-- [ ] デバイスタイプ選択(F446RE / FirstPenguin)
+- [ ] モータードライバー選択(丼モタ / FirstPenguin / RoboMaster)
 - [ ] PWM制御 (4ch): -32768 ~ 32767
 - [ ] CAN ID設定
 - [ ] 入力値バリデーション
 - [ ] エラーハンドリング・ユーザーへのフィードバック
 - [ ] 設定保存/読込(前回の設定を記憶)
+- [ ] ファームウェア書き込み機能
+  - [ ] 3種類のプリビルド済みバイナリをアプリに同梱
+  - [ ] ドライバー選択に応じたバイナリの自動選択
+  - [ ] ST-Link検出機能
+  - [ ] ワンクリック書き込み(st-flash実行)
+  - [ ] 書き込み進捗表示
+  - [ ] エラーハンドリング(ST-Link未接続など)
 
 ### 拡張機能(Phase 2以降)
 - [ ] FirstPenguinのフィードバック表示(エンコーダ/ADC値)
@@ -82,20 +113,28 @@ Re-SerialMotor/
 │   │   │   ├── main.rs
 │   │   │   ├── serial.rs       # シリアル通信
 │   │   │   ├── config.rs       # 設定保存/読込
-│   │   │   └── protocol.rs     # コマンド生成
+│   │   │   ├── protocol.rs     # コマンド生成
+│   │   │   └── firmware.rs     # ファームウェア書き込み
+│   │   ├── resources/          # 同梱リソース
+│   │   │   ├── f446re-donmotor.bin      # 丼モタ用
+│   │   │   ├── f446re-firstpenguin.bin  # FirstPenguin用
+│   │   │   └── f446re-robomaster.bin    # RoboMaster用
 │   │   └── Cargo.toml
 │   ├── src/               # フロントエンド(HTML/CSS/JS)
 │   │   ├── index.html
 │   │   ├── styles.css
 │   │   └── main.js
 │   └── package.json
-├── firmware/              # F446REファームウェア
-│   ├── f446re/           # 既存F446RE用
+├── firmware/              # F446REファームウェア(モータードライバー別)
+│   ├── f446re-donmotor/       # 丼モタ用(現行実装)
 │   │   ├── platformio.ini
-│   │   └── src/
-│   └── firstpenguin/     # FirstPenguin用(後日追加)
+│   │   └── src/main.cpp
+│   ├── f446re-firstpenguin/   # FirstPenguin用
+│   │   ├── platformio.ini
+│   │   └── src/main.cpp
+│   └── f446re-robomaster/     # RoboMaster C620用
 │       ├── platformio.ini
-│       └── src/
+│       └── src/main.cpp
 ├── docs/                  # ドキュメント
 │   ├── protocol.md       # 通信プロトコル仕様
 │   └── build.md          # ビルド手順
@@ -171,15 +210,28 @@ struct {
 - [ ] PWM制御UI実装
 - [ ] FirstPenguin基板対応UI実装
 - [ ] 設定保存/読込機能
+- [ ] ファームウェア書き込み機能実装
+  - [ ] st-flash実行ラッパー
+  - [ ] バイナリファイルの同梱設定
+  - [ ] 書き込みUI実装
 
 ### Phase 3: ファームウェア整理
-- [ ] F446REコードの整理・コメント追加
-- [ ] ビルド手順のドキュメント化
+- [ ] 既存コードを丼モタ用として整理(f446re-donmotor/)
+- [ ] FirstPenguin用ファームウェア実装(f446re-firstpenguin/)
+- [ ] RoboMaster用ファームウェア実装(f446re-robomaster/) - Phase 2
+- [ ] 各ファームウェアのビルド手順ドキュメント化
+- [ ] ビルド自動化スクリプト作成(3種類一括ビルド)
+- [ ] プリビルド済みバイナリの生成手順確立
 
 ### Phase 4: 配布準備
 - [ ] GitHub Actions設定(クロスプラットフォームビルド)
+  - [ ] GUIアプリのビルド(Windows/Linux)
+  - [ ] ファームウェアのビルド(PlatformIO)
+  - [ ] バイナリファイルの自動同梱
 - [ ] Release自動化
 - [ ] README/ドキュメント整備
+  - [ ] st-flashのインストール方法
+  - [ ] ファームウェア書き込み手順
 
 ### Phase 5: テスト・リリース
 - [ ] 実機テスト
@@ -194,15 +246,25 @@ struct {
 - **配布**: GitHub Releases (Windows/Linux)
 - **ビルド自動化**: GitHub Actions
 
-### 対応デバイス
-1. **F446RE** (既存)
+### 対応構成
+**F446REマイコン(共通)** → モータードライバー(以下3種類)
+
+1. **丼モタ** (現行実装)
    - PWM 4ch制御
    - CAN通信経由
+   - ファームウェア: f446re-donmotor.bin
    
 2. **FirstPenguin** (自作基板)
    - PWM 4ch制御
    - CAN通信経由
    - エンコーダ/ADCフィードバック機能
+   - ファームウェア: f446re-firstpenguin.bin
+
+3. **RoboMaster C620** (Phase 2以降)
+   - RPM制御 (最大8ch)
+   - CAN通信経由
+   - 特殊な制御プロトコル
+   - ファームウェア: f446re-robomaster.bin
 
 ### 機能方針
 - ログファイル出力: **削除**(シンプル化のため)
