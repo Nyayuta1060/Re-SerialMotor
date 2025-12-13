@@ -1,0 +1,10 @@
+{
+  "name": "re-serialmotor",
+  "version": "0.1.0",
+  "description": "Serial Motor Control Application",
+  "private": true,
+  "scripts": {
+    "dev": "cd gui && npm run dev",
+    "build": "cd gui && npm run build"
+  }
+}

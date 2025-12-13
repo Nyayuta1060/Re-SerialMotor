@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Re-SerialMotor</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Re-SerialMotor - 丼モタ制御</h1>
+        </header>
+
+        <main>
+            <!-- 接続セクション -->
+            <section class="connection-section">
+                <h2>シリアルポート接続</h2>
+                <div class="control-group">
+                    <label for="port-select">ポート:</label>
+                    <select id="port-select">
+                        <option value="">ポートを選択してください</option>
+                    </select>
+                    <button id="refresh-btn" class="btn-secondary">更新</button>
+                </div>
+                <div class="control-group">
+                    <button id="connect-btn" class="btn-primary">接続</button>
+                    <button id="disconnect-btn" class="btn-secondary" disabled>切断</button>
+                    <span id="status" class="status disconnected">未接続</span>
+                </div>
+            </section>
+
+            <!-- PWM制御セクション -->
+            <section class="pwm-section">
+                <h2>PWM制御</h2>
+                <div class="control-group">
+                    <button id="start-btn" class="btn-success" disabled>動作開始 (i)</button>
+                    <button id="stop-btn" class="btn-danger" disabled>動作停止 (o)</button>
+                </div>
+
+                <div class="pwm-controls">
+                    <!-- PWM Channel 0 -->
+                    <div class="pwm-channel">
+                        <label>CH0 (p0):</label>
+                        <input type="range" id="pwm0-slider" min="-32000" max="32000" value="0" disabled>
+                        <input type="number" id="pwm0-input" min="-32000" max="32000" value="0" disabled>
+                        <button class="btn-reset" data-channel="0" disabled>リセット</button>
+                    </div>
+
+                    <!-- PWM Channel 1 -->
+                    <div class="pwm-channel">
+                        <label>CH1 (p1):</label>
+                        <input type="range" id="pwm1-slider" min="-32000" max="32000" value="0" disabled>
+                        <input type="number" id="pwm1-input" min="-32000" max="32000" value="0" disabled>
+                        <button class="btn-reset" data-channel="1" disabled>リセット</button>
+                    </div>
+
+                    <!-- PWM Channel 2 -->
+                    <div class="pwm-channel">
+                        <label>CH2 (p2):</label>
+                        <input type="range" id="pwm2-slider" min="-32000" max="32000" value="0" disabled>
+                        <input type="number" id="pwm2-input" min="-32000" max="32000" value="0" disabled>
+                        <button class="btn-reset" data-channel="2" disabled>リセット</button>
+                    </div>
+
+                    <!-- PWM Channel 3 -->
+                    <div class="pwm-channel">
+                        <label>CH3 (p3):</label>
+                        <input type="range" id="pwm3-slider" min="-32000" max="32000" value="0" disabled>
+                        <input type="number" id="pwm3-input" min="-32000" max="32000" value="0" disabled>
+                        <button class="btn-reset" data-channel="3" disabled>リセット</button>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label for="can-id">CAN ID:</label>
+                    <input type="number" id="can-id" min="1" max="4" value="1" disabled>
+                    <button id="set-can-btn" class="btn-secondary" disabled>CAN ID設定 (c)</button>
+                </div>
+
+                <div class="control-group">
+                    <button id="all-zero-btn" class="btn-warning" disabled>全CH 0に設定</button>
+                </div>
+            </section>
+
+            <!-- ログセクション -->
+            <section class="log-section">
+                <h2>ログ</h2>
+                <div id="log-output" class="log-output"></div>
+                <button id="clear-log-btn" class="btn-secondary">クリア</button>
+            </section>
+        </main>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+</html>

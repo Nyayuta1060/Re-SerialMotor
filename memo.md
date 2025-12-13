@@ -125,14 +125,14 @@ Re-SerialMotor/
 │   │   ├── styles.css
 │   │   └── main.js
 │   └── package.json
-├── firmware/              # F446REファームウェア(モータードライバー別)
-│   ├── f446re-donmotor/       # 丼モタ用(現行実装)
+├── Firmware/              # F446REファームウェア(モータードライバー別)
+│   ├── donmotor/       # 丼モタ用(現行実装)
 │   │   ├── platformio.ini
 │   │   └── src/main.cpp
-│   ├── f446re-firstpenguin/   # FirstPenguin用
+│   ├── firstpenguin/   # FirstPenguin用
 │   │   ├── platformio.ini
 │   │   └── src/main.cpp
-│   └── f446re-robomaster/     # RoboMaster C620用
+│   └── robomaster/     # RoboMaster C620用
 │       ├── platformio.ini
 │       └── src/main.cpp
 ├── docs/                  # ドキュメント
@@ -204,12 +204,12 @@ struct {
 - [ ] UIモックアップ作成
 
 ### Phase 2: GUI実装(コア機能)
-- [ ] プロジェクトセットアップ(Tauri)
-- [ ] シリアル通信機能実装(Rust)
-- [ ] UI実装(ポート選択、接続管理)
-- [ ] PWM制御UI実装
+- [x] プロジェクトセットアップ(Tauri)
+- [x] シリアル通信機能実装(Rust)
+- [x] UI実装(ポート選択、接続管理)
+- [x] PWM制御UI実装
 - [ ] FirstPenguin基板対応UI実装
-- [ ] 設定保存/読込機能
+- [x] 設定保存/読込機能
 - [ ] ファームウェア書き込み機能実装
   - [ ] st-flash実行ラッパー
   - [ ] バイナリファイルの同梱設定
